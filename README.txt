@@ -1,13 +1,53 @@
-O código será rodado a partir do main branch, então apenas mudanças registradas lá serão rodadas. 
-Para atualizar branch de acordo com a main, abar o terminal e use:
-  git checkout SEU_BRANCH
-  git merge main
-  git push origin SEU_BRANCH
-Para commitar as mudanças em seu próprio branch, abra o terminal e use:
-  git add .
-  git commit -m "NOME_DO_COMMIT"
-  git push origin SEU_BRANCH
-Para atualizar o main de acordo com sua branch, abra o terminal e use:
-  git checkout main
-  git merge SEU_BRANCH
-  git push origin main
+## Como iniciar o projeto no seu computador
+
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/David-Mandel0707/diego-clean.git
+cd diego-clean
+```
+
+### 2. Criar e ativar o ambiente virtual
+```bash
+python -m venv .venv
+```
+Windows:
+```bash
+.venv\Scripts\activate
+```
+Mac/Linux:
+```bash
+source .venv/bin/activate
+```
+
+### 3. Instalar dependências
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Criar o arquivo .env
+Peça ao responsável pelo projeto as seguintes variáveis e crie um arquivo `.env` na raiz do projeto:
+  SECRET_KEY=
+  DATABASE_URL=
+  DEBUG=
+  ALLOWED_HOSTS=
+
+### 5. Criar seu branch
+```bash
+git checkout -b seu-nome
+```
+> Nunca trabalhe diretamente no main.
+
+## Uso diário
+
+### Trabalhar e enviar alterações
+```bash
+git add .
+git commit -m "descrição do que foi feito"
+git push origin seu-nome
+```
+
+### Receber atualizações do main
+```bash
+git fetch origin
+git merge main
+```
