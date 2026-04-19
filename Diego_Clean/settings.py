@@ -76,7 +76,11 @@ WSGI_APPLICATION = 'Diego_Clean.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': config('DATABASE_URL', cast=db_url)
+    'default': config(
+        'DATABASE_URL',
+        default='sqlite:///db.sqlite3',
+        cast=db_url
+    )
 }
 
 
