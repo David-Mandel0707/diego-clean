@@ -11,13 +11,13 @@ cd diego-clean
 python -m venv .venv
 ```
 Windows:
-```bash
-.venv\Scripts\activate
-```
+  ```bash
+  .venv\Scripts\activate
+  ```
 Mac/Linux:
-```bash
-source .venv/bin/activate
-```
+  ```bash
+  source .venv/bin/activate
+  ```
 
 ### 3. Instalar dependências
 ```bash
@@ -25,11 +25,11 @@ pip install -r requirements.txt
 ```
 
 ### 4. Criar o arquivo .env
-Peça ao responsável pelo projeto as seguintes variáveis e crie um arquivo `.env` na raiz do projeto:
-  SECRET_KEY=
-  DATABASE_URL=
-  DEBUG=
-  ALLOWED_HOSTS=
+Peça ao David as seguintes variáveis e crie um arquivo `.env` na raiz do projeto contendo o seguinte:
+  SECRET_KEY=***********
+  DATABASE_URL=*********
+  DEBUG=****************
+  ALLOWED_HOSTS=********
 
 ### 5. Criar seu branch
 ```bash
@@ -38,6 +38,11 @@ git checkout -b seu-nome
 > Nunca trabalhe diretamente no main.
 
 ## Uso diário
+
+### Adicionar novos módulos obrigatórios ao requirements.txt
+```bash
+pip freeze > requirements.txt
+```
 
 ### Trabalhar e enviar alterações
 ```bash
