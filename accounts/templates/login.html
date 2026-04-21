@@ -3,9 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login - DiegoClean</title>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #ffffff;
+    }
+
+    .login-container {
+        min-height: 100vh;
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .logo {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .logo h2 {
+        margin: 5px 0;
+        font-size: 24px;
+        color: #333;
+    }
+
+    .logo p {
+        font-size: 13px;
+        color: gray;
+    }
+
+    form {
+        width: 100%;
+    }
+
+    input {
+        width: 100%;
+        padding: 14px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    input:focus {
+        border-color: #2ecc71;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        background-color: #2ecc71;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 13px;
+    }
+
+    .footer a {
+        color: #2ecc71;
+        text-decoration: none;
+    }
+
+    @media (min-width: 768px) {
+        body {
+            background-color: #f2f2f2;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+    }
+</style>
+
 </head>
 <body>
-    <h1>Hello, World!</h1>
+
+<div class="login-container">
+
+    <div class="logo">
+        <h2>DiegoClean</h2>
+        <p>Limpeza Tecnológica</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <input type="text" name="username" placeholder="Usuário" required>
+        <input type="password" name="password" placeholder="Senha" required>
+
+        <button type="submit">Entrar</button>
+    </form>
+
+    <div class="footer">
+        <p><a href="#">Esqueci minha senha</a></p>
+    </div>
+
+</div>
+
 </body>
 </html>
