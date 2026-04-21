@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}DiegoClean{% endblock %}</title>
+</head>
+<body>
+
+    <header>
+        <h1>Meu Projeto</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/produtos">Produtos</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>
