@@ -5,9 +5,6 @@
     <title>{% block title %}DiegoClean{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
-    <div class="container-logo">
-    <img src="{% static 'logo diegoclean.png' %}" alt="Logo">
-</div>
 <style>
     * {
         box-sizing: border-box;
@@ -116,7 +113,9 @@
 
 </head>
 <body>
-
+<div class="container-logo">
+    <img src="{% static 'logo-diegoclean.png' %}" alt="Logo">
+</div>
 <div class="login-container">
 
     <div class="logo">
