@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 def login(request):
      if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('Home.html')
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -15,7 +15,7 @@ def login(request):
 
         if user is not None:
             auth_login(request, user)
-            return redirect('home')
+            return redirect('Home.html')
         else:
             return render(request, 'login.html', {'error': 'Usuário ou senha inválidos'})
 
