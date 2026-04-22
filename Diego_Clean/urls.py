@@ -24,10 +24,4 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', lambda request: redirect('accounts/login/')),
     path('core/', include('core.urls')),
-    # path('diretores/', include('diretores.urls')),
-    # path('vendedores/',include('vendedores.urls'))
-    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-    path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('reset_done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]
