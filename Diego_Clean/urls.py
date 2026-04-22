@@ -21,7 +21,6 @@ urlpatterns = [
     path('', views.login, name='login'),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-    path('', lambda request: redirect('accounts/'), name='root'),
     # path('diretores/', include('diretores.urls')),
     # path('vendedores/',include('vendedores.urls'))
 ]
