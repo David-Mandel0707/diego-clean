@@ -4,6 +4,9 @@
 
 <head>
     {% load static %}
+    <div class="container-logo">
+    <img src="{% static 'img/logo.png' %}" alt="Logo">
+</div>
 <style>
     * {
         box-sizing: border-box;
@@ -15,8 +18,20 @@
         background-color: #ffffff;
     }
 
+    .container-logo {
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
+    height: 30vh;
+}
+
+.container-logo img {
+    max-width: 100px; 
+    height: auto;
+}
+
     .login-container {
-        min-height: 100vh;
+        min-height:50vh;
         padding: 30px 20px;
         display: flex;
         flex-direction: column;
