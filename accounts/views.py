@@ -5,6 +5,6 @@ from django.shortcuts import render
 
 def login(request):
     if request.user.is_authenticated:
-        return HttpResponse("Hello, World!")
+        return HttpResponse("Site funcionando")
 
-    return render(request, "login.html")
+        return render(request, "login.html")
