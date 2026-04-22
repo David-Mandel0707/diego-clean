@@ -6,4 +6,6 @@ from django.shortcuts import render
 def login(request):
     if request.user.is_authenticated:
         return HttpResponse("Site funcionando")
-        return redirect('/accounts/login/')  
+    if request.method=='POST':
+        return HttpResponse("Site funcionando")
+    return render(request, 'login.html')  
