@@ -20,6 +20,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('', lambda request: redirect('accounts/'), name='root'),
     # path('diretores/', include('diretores.urls')),
     # path('vendedores/',include('vendedores.urls'))
 ]
