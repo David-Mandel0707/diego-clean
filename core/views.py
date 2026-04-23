@@ -14,7 +14,7 @@ def _login_required(view):
 @_login_required
 def home(request: HttpRequest):
     hoje = timezone.now().date()
-    servicos_pendentes = Servico.objects.select_related('cliente').filter(status_pagamento=Servico.PENDENTE).order_by('-data')[:5]
+    qs_pendentes = Servico.objects.select_related('cliente').filter(status_pagamento=Servico.PENDENTE).order_by('-data')
     data_mes = list(Servico.objects.filter(
         status_pagamento=Servico.PAGO,
         data__year=hoje.year,
@@ -22,10 +22,12 @@ def home(request: HttpRequest):
     ).values('valor'))
     df_mes = pd.DataFrame(data_mes)
     faturamento_mes = float(df_mes['valor'].sum()) if not df_mes.empty else 0.0
-    pendentes_count = Servico.objects.filter(status_pagamento=Servico.PENDENTE).count()
+    pendentes_count = qs_pendentes.count()
     clientes_count = Cliente.objects.count()
+    paginator = Paginator(qs_pendentes, 5)
+    page_pendentes = paginator.get_page(request.GET.get('page'))
     return render(request, 'Home.html', {
-        'servicos_pendentes': servicos_pendentes,
+        'page_pendentes': page_pendentes,
         'faturamento_mes': faturamento_mes,
         'pendentes_count': pendentes_count,
         'clientes_count': clientes_count,
@@ -120,6 +122,28 @@ def editar_cliente(request: HttpRequest, pk: int):
             cliente.save()
             return redirect('cliente_detalhe', pk=pk)
     return render(request, 'EditarCliente.html', {'cliente': cliente})
+
+
+@_login_required
+def editar_servico(request: HttpRequest, pk: int):
+    servico = get_object_or_404(Servico, pk=pk)
+    clientes_lista = Cliente.objects.all()
+    if request.method == 'POST':
+        cliente_id = request.POST.get('cliente')
+        data = request.POST.get('data')
+        descricao = request.POST.get('descricao', '').strip()
+        valor = request.POST.get('valor')
+        status = request.POST.get('status_pagamento')
+        if cliente_id and data and valor:
+            servico.cliente = get_object_or_404(Cliente, pk=cliente_id)
+            servico.data = data
+            servico.descricao = descricao
+            servico.valor = valor
+            if status in dict(Servico.STATUS_CHOICES):
+                servico.status_pagamento = status
+            servico.save()
+            return redirect('cliente_detalhe', pk=servico.cliente.pk)
+    return render(request, 'EditarServico.html', {'servico': servico, 'clientes': clientes_lista})
 
 
 @_login_required

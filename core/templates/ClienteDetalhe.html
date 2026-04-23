@@ -141,7 +141,12 @@
     <div class="servico-desc">{{ servico.descricao|default:"Sem descrição" }}</div>
   </div>
   <div class="servico-right">
-    <span class="servico-valor">R$ {{ servico.valor }}</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="servico-valor">R$ {{ servico.valor }}</span>
+      <a href="{% url 'editar_servico' servico.pk %}" style="color:var(--text-muted);font-size:14px;text-decoration:none;" title="Editar serviço">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </a>
+    </div>
     <form class="status-form" method="POST" action="{% url 'atualizar_status' servico.pk %}">
       {% csrf_token %}
       <input type="hidden" name="next" value="{% url 'cliente_detalhe' cliente.pk %}">

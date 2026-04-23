@@ -42,6 +42,46 @@
     font-size: 14px;
     padding: 40px 0;
   }
+
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .search-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 13px 16px 13px 42px;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color .18s;
+    box-sizing: border-box;
+  }
+
+  .search-input:focus { border-color: var(--primary); }
+  .search-input::placeholder { color: #c0c7d0; }
+
+  .empty-search {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 40px 0;
+    display: none;
+  }
 </style>
 
 <div class="section-header">
@@ -51,6 +91,12 @@
   </a>
 </div>
 
+<div class="search-wrapper">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="text" id="search-clientes" class="search-input" placeholder="Buscar cliente...">
+</div>
+
+<div id="lista-clientes">
 {% for cliente in clientes %}
 <a href="{% url 'cliente_detalhe' cliente.pk %}" class="cliente-item">
   <div>
@@ -64,5 +110,27 @@
 {% empty %}
 <div class="empty">Nenhum cliente cadastrado ainda.</div>
 {% endfor %}
+</div>
+
+<div class="empty-search" id="empty-search">Nenhum cliente encontrado.</div>
+
+<script>
+  const input = document.getElementById('search-clientes');
+  const lista = document.getElementById('lista-clientes');
+  const emptySearch = document.getElementById('empty-search');
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    let visible = 0;
+    lista.querySelectorAll('.cliente-item').forEach(el => {
+      const nome = el.querySelector('.cliente-nome').textContent.toLowerCase();
+      const meta = el.querySelector('.cliente-meta').textContent.toLowerCase();
+      const match = nome.includes(q) || meta.includes(q);
+      el.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    emptySearch.style.display = visible === 0 && q.length > 0 ? 'block' : 'none';
+  });
+</script>
 
 {% endblock %}

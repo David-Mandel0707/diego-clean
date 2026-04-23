@@ -57,33 +57,6 @@
     padding: 40px 0;
   }
 
-  .pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-  }
-
-  .page-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: border-color .18s, background .18s;
-  }
-
-  .page-btn:hover { border-color: var(--primary); color: var(--primary); }
-  .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-  .page-btn.disabled { opacity: .35; pointer-events: none; }
 
   .filtro-form {
     background: var(--surface);
@@ -213,6 +186,7 @@
         <th>Valor</th>
         <th>Realizado por</th>
         <th>Status</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -237,9 +211,14 @@
             <span class="badge badge-yellow"><i class="fa-solid fa-clock" style="margin-right:4px;"></i>Pendente</span>
           {% endif %}
         </td>
+        <td>
+          <a href="{% url 'editar_servico' servico.pk %}" style="color:var(--text-muted);font-size:14px;text-decoration:none;" title="Editar serviço">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </a>
+        </td>
       </tr>
       {% empty %}
-      <tr><td colspan="5" class="empty">Nenhum serviço registrado ainda.</td></tr>
+      <tr><td colspan="6" class="empty">Nenhum serviço registrado ainda.</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -247,13 +226,23 @@
 
 {% if page.paginator.num_pages > 1 %}
 <div class="pagination">
-  <a href="?page={{ page.previous_page_number }}" class="page-btn {% if not page.has_previous %}disabled{% endif %}">
+  {% if page.has_previous %}
+    <a href="?page={{ page.previous_page_number }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}" class="page-btn">
+  {% else %}
+    <a class="page-btn disabled">
+  {% endif %}
     <i class="fa-solid fa-chevron-left"></i>
   </a>
+
   {% for num in page.paginator.page_range %}
-    <a href="?page={{ num }}" class="page-btn {% if num == page.number %}active{% endif %}">{{ num }}</a>
+    <a href="?page={{ num }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}" class="page-btn {% if num == page.number %}active{% endif %}">{{ num }}</a>
   {% endfor %}
-  <a href="?page={{ page.next_page_number }}" class="page-btn {% if not page.has_next %}disabled{% endif %}">
+
+  {% if page.has_next %}
+    <a href="?page={{ page.next_page_number }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}" class="page-btn">
+  {% else %}
+    <a class="page-btn disabled">
+  {% endif %}
     <i class="fa-solid fa-chevron-right"></i>
   </a>
 </div>

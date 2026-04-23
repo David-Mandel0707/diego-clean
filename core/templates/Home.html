@@ -63,6 +63,7 @@
     font-size: 14px;
     padding: 32px 0;
   }
+
 </style>
 
 <div class="stats-grid">
@@ -90,7 +91,7 @@
   </a>
 </div>
 
-{% for servico in servicos_pendentes %}
+{% for servico in page_pendentes %}
 <div class="servico-item">
   <div class="servico-info">
     <div class="servico-nome">{{ servico.cliente.nome }}</div>
@@ -100,12 +101,36 @@
   <form class="status-form" method="POST" action="{% url 'atualizar_status' servico.pk %}">
     {% csrf_token %}
     <input type="hidden" name="status" value="pago">
-    <input type="hidden" name="next" value="{% url 'home' %}">
+    <input type="hidden" name="next" value="{% url 'home' %}?page={{ page_pendentes.number }}">
     <button type="submit" class="btn-pagar">Finalizar pedido</button>
   </form>
 </div>
 {% empty %}
 <div class="empty">Nenhum serviço pendente</div>
 {% endfor %}
+
+{% if page_pendentes.paginator.num_pages > 1 %}
+<div class="pagination">
+  {% if page_pendentes.has_previous %}
+    <a href="?page={{ page_pendentes.previous_page_number }}" class="page-btn">
+  {% else %}
+    <a class="page-btn disabled">
+  {% endif %}
+    <i class="fa-solid fa-chevron-left"></i>
+  </a>
+
+  {% for num in page_pendentes.paginator.page_range %}
+    <a href="?page={{ num }}" class="page-btn {% if num == page_pendentes.number %}active{% endif %}">{{ num }}</a>
+  {% endfor %}
+
+  {% if page_pendentes.has_next %}
+    <a href="?page={{ page_pendentes.next_page_number }}" class="page-btn">
+  {% else %}
+    <a class="page-btn disabled">
+  {% endif %}
+    <i class="fa-solid fa-chevron-right"></i>
+  </a>
+</div>
+{% endif %}
 
 {% endblock %}
