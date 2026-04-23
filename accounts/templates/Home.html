@@ -32,7 +32,10 @@
         {% for cliente in clientes %}
         <tr>
             <td>{{ cliente.nome }}</td>
-            <td>{{ cliente.email }}</td>
+            <td>{{ cliente.serviço }}</td>
+            <td>{{ cliente.data }}</td>
+            <td>{{ cliente.valor }}</td>
+            <td>{{ cliente.status }}</td>
         </tr>
         {% endfor %}
     </table>
