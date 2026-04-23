@@ -3,7 +3,7 @@ from django.http import HttpRequest
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
-from decimal import Decimal
+import pandas as pd
 from .models import Servico, Cliente
 
 
@@ -15,13 +15,13 @@ def _login_required(view):
 def home(request: HttpRequest):
     hoje = timezone.now().date()
     servicos_pendentes = Servico.objects.select_related('cliente').filter(status_pagamento=Servico.PENDENTE).order_by('-data')[:5]
-    faturamento_mes = sum(
-        s.valor for s in Servico.objects.filter(
-            status_pagamento=Servico.PAGO,
-            data__year=hoje.year,
-            data__month=hoje.month,
-        )
-    ) or Decimal('0')
+    data_mes = list(Servico.objects.filter(
+        status_pagamento=Servico.PAGO,
+        data__year=hoje.year,
+        data__month=hoje.month,
+    ).values('valor'))
+    df_mes = pd.DataFrame(data_mes)
+    faturamento_mes = float(df_mes['valor'].sum()) if not df_mes.empty else 0.0
     pendentes_count = Servico.objects.filter(status_pagamento=Servico.PENDENTE).count()
     clientes_count = Cliente.objects.count()
     return render(request, 'Home.html', {
@@ -81,9 +81,11 @@ def novo_servico(request: HttpRequest):
 @_login_required
 def historico(request: HttpRequest):
     qs = Servico.objects.select_related('cliente', 'funcionario').all()
-    total_faturado = sum(s.valor for s in qs.filter(status_pagamento=Servico.PAGO)) or Decimal('0')
-    total_servicos = qs.count()
-    total_pendentes = qs.filter(status_pagamento=Servico.PENDENTE).count()
+    data_hist = list(qs.values('cliente__nome', 'funcionario__username', 'funcionario__first_name', 'funcionario__last_name', 'data', 'descricao', 'valor', 'status_pagamento'))
+    df = pd.DataFrame(data_hist)
+    total_faturado = float(df.loc[df['status_pagamento'] == Servico.PAGO, 'valor'].sum()) if not df.empty else 0.0
+    total_servicos = len(df) if not df.empty else 0
+    total_pendentes = int(df[df['status_pagamento'] == Servico.PENDENTE].shape[0]) if not df.empty else 0
     paginator = Paginator(qs, 10)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'Historico.html', {

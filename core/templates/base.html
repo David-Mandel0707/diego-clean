@@ -172,7 +172,6 @@
         .badge-red    { background: #fee2e2; color: #dc2626; }
         .badge-yellow { background: #fef9c3; color: #ca8a04; }
 
-        /* ── Stats grid ── */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -214,6 +213,31 @@
             font-size: 18px;
             margin-bottom: 4px;
             color: var(--text-muted);
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background .18s;
+        }
+
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
         }
 
         .btn-logout {

@@ -6,38 +6,49 @@
 <style>
   .section-title { margin-bottom: 16px; }
 
-
-  .servico-item {
+  .table-wrapper {
     background: var(--surface);
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    padding: 14px 16px;
-    margin-bottom: 10px;
+    overflow-x: auto;
+    margin-bottom: 16px;
   }
 
-  .servico-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
   }
 
-  .servico-nome { font-weight: 600; font-size: 15px; }
-  .servico-valor { font-weight: 700; font-size: 15px; }
+  thead tr {
+    border-bottom: 1px solid var(--border);
+  }
 
-  .servico-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
+  th {
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
   }
 
-  .servico-funcionario {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
   }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover { background: var(--bg); }
+
+  .td-cliente { font-weight: 600; }
+  .td-desc { color: var(--text-muted); font-size: 12px; }
+  .td-valor { font-weight: 700; white-space: nowrap; }
+  .td-func { white-space: nowrap; }
 
   .empty {
     text-align: center;
@@ -52,7 +63,6 @@
     justify-content: center;
     gap: 8px;
     margin-top: 20px;
-    padding-bottom: 8px;
   }
 
   .page-btn {
@@ -98,35 +108,46 @@
   </div>
 </div>
 
-{% for servico in page %}
-<div class="servico-item">
-  <div class="servico-top">
-    <span class="servico-nome">{{ servico.cliente.nome }}</span>
-    <span class="servico-valor">R$ {{ servico.valor }}</span>
-  </div>
-  {% if servico.descricao %}
-  <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px;">{{ servico.descricao|truncatechars:60 }}</div>
-  {% endif %}
-  <div class="servico-bottom">
-    <span><i class="fa-solid fa-calendar-days" style="margin-right:4px;"></i>{{ servico.data }}</span>
-    <span class="servico-funcionario">
-      <i class="fa-solid fa-circle-user"></i>
-      {% if servico.funcionario %}{{ servico.funcionario.get_full_name|default:servico.funcionario.username }}{% else %}—{% endif %}
-    </span>
-    <span>
-      {% if servico.status_pagamento == 'pago' %}
-        <span class="badge badge-green"><i class="fa-solid fa-check" style="margin-right:4px;"></i>Pago</span>
-      {% elif servico.status_pagamento == 'cancelado' %}
-        <span class="badge badge-red"><i class="fa-solid fa-xmark" style="margin-right:4px;"></i>Cancelado</span>
-      {% else %}
-        <span class="badge badge-yellow"><i class="fa-solid fa-clock" style="margin-right:4px;"></i>Pendente</span>
-      {% endif %}
-    </span>
-  </div>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Data</th>
+        <th>Valor</th>
+        <th>Realizado por</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for servico in page %}
+      <tr>
+        <td>
+          <div class="td-cliente">{{ servico.cliente.nome }}</div>
+          {% if servico.descricao %}<div class="td-desc">{{ servico.descricao|truncatechars:40 }}</div>{% endif %}
+        </td>
+        <td style="white-space:nowrap;">{{ servico.data }}</td>
+        <td class="td-valor">R$ {{ servico.valor }}</td>
+        <td class="td-func">
+          <i class="fa-solid fa-circle-user" style="margin-right:4px;color:var(--text-muted);"></i>
+          {% if servico.funcionario %}{{ servico.funcionario.get_full_name|default:servico.funcionario.username }}{% else %}—{% endif %}
+        </td>
+        <td>
+          {% if servico.status_pagamento == 'pago' %}
+            <span class="badge badge-green"><i class="fa-solid fa-check" style="margin-right:4px;"></i>Pago</span>
+          {% elif servico.status_pagamento == 'cancelado' %}
+            <span class="badge badge-red"><i class="fa-solid fa-xmark" style="margin-right:4px;"></i>Cancelado</span>
+          {% else %}
+            <span class="badge badge-yellow"><i class="fa-solid fa-clock" style="margin-right:4px;"></i>Pendente</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="empty">Nenhum serviço registrado ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-{% empty %}
-<div class="empty">Nenhum serviço registrado ainda.</div>
-{% endfor %}
 
 {% if page.paginator.num_pages > 1 %}
 <div class="pagination">
