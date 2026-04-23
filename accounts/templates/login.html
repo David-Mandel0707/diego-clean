@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <title>{% block title %}DiegoClean{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
     * {
         box-sizing: border-box;
@@ -12,24 +16,24 @@
 
     body {
         margin: 0;
-        font-family: Arial, sans-serif;
+        font-family: 'Open Sans', sans-serif;
         background-color: #ffffff;
     }
 
     .container-logo {
-    display: flex;
-    justify-content: center; 
-    align-items: center;     
-    height: 30vh;
-}
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 30vh;
+    }
 
-.container-logo img {
-    max-width: 100px; 
-    height: auto;
-}
+    .container-logo img {
+        max-width: 100px;
+        height: auto;
+    }
 
     .login-container {
-        min-height:50vh;
+        min-height: 50vh;
         padding: 30px 20px;
         display: flex;
         flex-direction: column;
@@ -44,6 +48,7 @@
     .logo h2 {
         margin: 5px 0;
         font-size: 24px;
+        font-family: 'Poppins', sans-serif;
         color: #333;
     }
 
@@ -56,17 +61,41 @@
         width: 100%;
     }
 
-    input {
-        width: 100%;
-        padding: 14px;
+    .input-wrapper {
+        position: relative;
         margin-bottom: 12px;
+    }
+
+    .input-wrapper i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #aaa;
+        font-size: 15px;
+        pointer-events: none;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+        padding: 14px 14px 14px 44px;
         border-radius: 12px;
         border: 1px solid #ccc;
         font-size: 16px;
+        font-family: 'Open Sans', sans-serif;
+        outline: none;
+        transition: border-color .18s;
     }
 
-    input:focus {
+    .input-wrapper input:focus {
         border-color: #2ecc71;
+    }
+
+    .error {
+        font-size: 13px;
+        color: #dc2626;
+        margin-bottom: 8px;
+        text-align: center;
     }
 
     button {
@@ -77,8 +106,14 @@
         background-color: #2ecc71;
         color: white;
         font-size: 16px;
-        font-weight: bold;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
         cursor: pointer;
+        transition: background .18s, transform .1s;
+    }
+
+    button:hover {
+        background-color: #27ae60;
     }
 
     button:active {
@@ -123,11 +158,22 @@
         <p>Limpeza Ecológica</p>
     </div>
 
-    <form method="POST">
+    <form method="POST" action="{% url 'login' %}">
         {% csrf_token %}
 
-        <input type="text" name="username" placeholder="Usuário" required>
-        <input type="password" name="password" placeholder="Senha" required>
+        <div class="input-wrapper">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" name="username" placeholder="Usuário" required>
+        </div>
+
+        <div class="input-wrapper">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" name="password" placeholder="Senha" required>
+        </div>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
 
         <button type="submit">Entrar</button>
     </form>
