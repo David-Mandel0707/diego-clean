@@ -31,9 +31,7 @@ class Servico(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='servicos')
     funcionario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.PROTECT,
         related_name='servicos',
     )
     data = models.DateField()

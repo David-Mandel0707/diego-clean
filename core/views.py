@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.utils import timezone
 from decimal import Decimal
 from .models import Servico, Cliente
@@ -75,6 +76,37 @@ def novo_servico(request: HttpRequest):
         )
         return redirect('home')
     return render(request, 'NovoServico.html', {'clientes': clientes_lista})
+
+
+@_login_required
+def historico(request: HttpRequest):
+    qs = Servico.objects.select_related('cliente', 'funcionario').all()
+    total_faturado = sum(s.valor for s in qs.filter(status_pagamento=Servico.PAGO)) or Decimal('0')
+    total_servicos = qs.count()
+    total_pendentes = qs.filter(status_pagamento=Servico.PENDENTE).count()
+    paginator = Paginator(qs, 10)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'Historico.html', {
+        'page': page,
+        'total_faturado': total_faturado,
+        'total_servicos': total_servicos,
+        'total_pendentes': total_pendentes,
+    })
+
+
+@_login_required
+def editar_cliente(request: HttpRequest, pk: int):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        if nome:
+            cliente.nome = nome
+            cliente.telefone = request.POST.get('telefone', '').strip()
+            cliente.endereco = request.POST.get('endereco', '').strip()
+            cliente.observacoes = request.POST.get('observacoes', '').strip()
+            cliente.save()
+            return redirect('cliente_detalhe', pk=pk)
+    return render(request, 'EditarCliente.html', {'cliente': cliente})
 
 
 @_login_required

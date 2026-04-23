@@ -38,7 +38,7 @@
         }
 
         body {
-            padding-bottom: calc(var(--nav-h) + 16px);
+            padding-bottom: calc(var(--nav-h) + 80px);
         }
 
         .topbar {
@@ -172,6 +172,50 @@
         .badge-red    { background: #fee2e2; color: #dc2626; }
         .badge-yellow { background: #fef9c3; color: #ca8a04; }
 
+        /* ── Stats grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 18px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stat-card--full { grid-column: span 2; }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .stat-card .value.green { color: #16a34a; }
+        .stat-card .value.blue  { color: var(--primary); }
+
+        .stat-card .icon {
+            font-size: 18px;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+        }
+
         .btn-logout {
             display: flex;
             align-items: center;
@@ -231,9 +275,9 @@
         <i class="fa-solid fa-user-plus"></i>
         <span>Novo cliente</span>
     </a>
-    <a href="#" class="nav-item">
-        <i class="fa-solid fa-user"></i>
-        <span>Perfil</span>
+    <a href="{% url 'historico' %}" class="nav-item">
+        <i class="fa-solid fa-rectangle-list"></i>
+        <span>Histórico</span>
     </a>
 </nav>
 

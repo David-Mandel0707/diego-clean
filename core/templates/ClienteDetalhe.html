@@ -129,7 +129,12 @@
 </a>
 
 <div class="cliente-header">
-  <h2>{{ cliente.nome }}</h2>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <h2 style="margin-bottom:0;">{{ cliente.nome }}</h2>
+    <a href="{% url 'editar_cliente' cliente.pk %}" style="color:var(--text-muted);font-size:15px;text-decoration:none;" title="Editar">
+      <i class="fa-solid fa-pen-to-square"></i>
+    </a>
+  </div>
   {% if cliente.telefone %}
   <div class="cliente-info-row">
     <i class="fa-solid fa-phone" style="font-size:12px;"></i> {{ cliente.telefone }}

@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico — DiegoClean{% endblock %}
+
+{% block content %}
+<style>
+  .section-title { margin-bottom: 16px; }
+
+
+  .servico-item {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .servico-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .servico-nome { font-weight: 600; font-size: 15px; }
+  .servico-valor { font-weight: 700; font-size: 15px; }
+
+  .servico-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .servico-funcionario {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 40px 0;
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding-bottom: 8px;
+  }
+
+  .page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color .18s, background .18s;
+  }
+
+  .page-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .page-btn.disabled { opacity: .35; pointer-events: none; }
+</style>
+
+<div class="section-title">
+  <i class="fa-solid fa-clock-rotate-left" style="margin-right:8px;color:var(--primary);"></i>Histórico de Pedidos
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <i class="fa-solid fa-money-bill-wave icon"></i>
+    <span class="label">Total faturado</span>
+    <span class="value green">R$ {{ total_faturado }}</span>
+  </div>
+  <div class="stat-card">
+    <i class="fa-solid fa-clock icon"></i>
+    <span class="label">Pendentes</span>
+    <span class="value blue">{{ total_pendentes }}</span>
+  </div>
+  <div class="stat-card stat-card--full">
+    <i class="fa-solid fa-list-check icon"></i>
+    <span class="label">Total de serviços</span>
+    <span class="value">{{ total_servicos }}</span>
+  </div>
+</div>
+
+{% for servico in page %}
+<div class="servico-item">
+  <div class="servico-top">
+    <span class="servico-nome">{{ servico.cliente.nome }}</span>
+    <span class="servico-valor">R$ {{ servico.valor }}</span>
+  </div>
+  {% if servico.descricao %}
+  <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px;">{{ servico.descricao|truncatechars:60 }}</div>
+  {% endif %}
+  <div class="servico-bottom">
+    <span><i class="fa-solid fa-calendar-days" style="margin-right:4px;"></i>{{ servico.data }}</span>
+    <span class="servico-funcionario">
+      <i class="fa-solid fa-circle-user"></i>
+      {% if servico.funcionario %}{{ servico.funcionario.get_full_name|default:servico.funcionario.username }}{% else %}—{% endif %}
+    </span>
+    <span>
+      {% if servico.status_pagamento == 'pago' %}
+        <span class="badge badge-green"><i class="fa-solid fa-check" style="margin-right:4px;"></i>Pago</span>
+      {% elif servico.status_pagamento == 'cancelado' %}
+        <span class="badge badge-red"><i class="fa-solid fa-xmark" style="margin-right:4px;"></i>Cancelado</span>
+      {% else %}
+        <span class="badge badge-yellow"><i class="fa-solid fa-clock" style="margin-right:4px;"></i>Pendente</span>
+      {% endif %}
+    </span>
+  </div>
+</div>
+{% empty %}
+<div class="empty">Nenhum serviço registrado ainda.</div>
+{% endfor %}
+
+{% if page.paginator.num_pages > 1 %}
+<div class="pagination">
+  <a href="?page={{ page.previous_page_number }}" class="page-btn {% if not page.has_previous %}disabled{% endif %}">
+    <i class="fa-solid fa-chevron-left"></i>
+  </a>
+  {% for num in page.paginator.page_range %}
+    <a href="?page={{ num }}" class="page-btn {% if num == page.number %}active{% endif %}">{{ num }}</a>
+  {% endfor %}
+  <a href="?page={{ page.next_page_number }}" class="page-btn {% if not page.has_next %}disabled{% endif %}">
+    <i class="fa-solid fa-chevron-right"></i>
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}
