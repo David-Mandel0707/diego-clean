@@ -328,14 +328,18 @@
     <a href="{% url 'novo_servico' %}" class="nav-item center-btn">
         <i class="fa-solid fa-plus"></i>
     </a>
-    <a href="{% url 'novo_cliente' %}" class="nav-item">
-        <i class="fa-solid fa-user-plus"></i>
-        <span>Novo cliente</span>
-    </a>
     <a href="{% url 'historico' %}" class="nav-item">
         <i class="fa-solid fa-rectangle-list"></i>
         <span>Histórico</span>
     </a>
+    {% if user.is_superuser %}
+    <a href="{% url 'funcionarios' %}" class="nav-item">
+        <i class="fa-solid fa-id-badge"></i>
+        <span>Equipe</span>
+    </a>
+    {% else %}
+    <div class="nav-item" style="pointer-events:none;visibility:hidden;"></div>
+    {% endif %}
 </nav>
 
 </body>

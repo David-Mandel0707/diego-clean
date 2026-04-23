@@ -98,12 +98,14 @@
     <div class="servico-meta">{{ servico.data }} {% if servico.descricao %}· {{ servico.descricao|truncatechars:30 }}{% endif %}</div>
   </div>
   <span class="servico-valor">R$ {{ servico.valor }}</span>
+  {% if servico.funcionario == request.user %}
   <form class="status-form" method="POST" action="{% url 'atualizar_status' servico.pk %}">
     {% csrf_token %}
     <input type="hidden" name="status" value="pago">
     <input type="hidden" name="next" value="{% url 'home' %}?page={{ page_pendentes.number }}">
     <button type="submit" class="btn-pagar">Finalizar pedido</button>
   </form>
+  {% endif %}
 </div>
 {% empty %}
 <div class="empty">Nenhum serviço pendente</div>

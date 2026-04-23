@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar {{ func.get_full_name|default:func.username }} — DiegoClean{% endblock %}
+
+{% block content %}
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+
+  .back-link:hover { color: var(--primary); }
+
+  .campo { margin-bottom: 20px; }
+
+  .campo label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .campo input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color .18s;
+  }
+
+  .campo input:focus { border-color: var(--primary); }
+
+  .campo .hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+
+  .btn-salvar {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .18s, transform .1s;
+    margin-top: 8px;
+  }
+
+  .btn-salvar:hover  { background: var(--primary-dark); }
+  .btn-salvar:active { transform: scale(0.98); }
+</style>
+
+<a href="{% url 'funcionarios' %}" class="back-link">
+  <i class="fa-solid fa-chevron-left"></i> Funcionários
+</a>
+
+<div class="section-title" style="margin-bottom:20px;">Editar Funcionário</div>
+
+{% if erro %}
+<div style="background:#fee2e2;color:#dc2626;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:500;margin-bottom:20px;">
+  <i class="fa-solid fa-circle-exclamation" style="margin-right:6px;"></i>{{ erro }}
+</div>
+{% endif %}
+
+<div class="card">
+  <form method="POST">
+    {% csrf_token %}
+
+    <div class="campo">
+      <label for="first_name">Nome *</label>
+      <input type="text" id="first_name" name="first_name" value="{{ func.first_name }}" required autofocus>
+    </div>
+
+    <div class="campo">
+      <label for="last_name">Sobrenome</label>
+      <input type="text" id="last_name" name="last_name" value="{{ func.last_name }}">
+    </div>
+
+    <div class="campo">
+      <label for="username">Usuário *</label>
+      <input type="text" id="username" name="username" value="{{ func.username }}" required>
+    </div>
+
+    <div class="campo">
+      <label for="senha">Nova senha</label>
+      <input type="password" id="senha" name="senha" placeholder="Deixe em branco para não alterar">
+      <div class="hint">Deixe em branco para manter a senha atual.</div>
+    </div>
+
+    <button type="submit" class="btn-salvar">Salvar alterações</button>
+  </form>
+</div>
+
+{% endblock %}

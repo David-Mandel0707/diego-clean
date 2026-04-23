@@ -212,9 +212,11 @@
           {% endif %}
         </td>
         <td>
+          {% if servico.funcionario == request.user or request.user.is_superuser %}
           <a href="{% url 'editar_servico' servico.pk %}" style="color:var(--text-muted);font-size:14px;text-decoration:none;" title="Editar serviço">
             <i class="fa-solid fa-pen-to-square"></i>
           </a>
+          {% endif %}
         </td>
       </tr>
       {% empty %}

@@ -1,27 +1,13 @@
 # Ambiente virtual
 .venv/
-
-# Variáveis de ambiente
 .env
-
-# Banco de dados local
 *.sqlite3
 db.sqlite3
-
-# Cache do Python
 __pycache__/
 *.py[cod]
 *.pyo
-
-# VS Code
 .vscode/
-
-# Arquivos de mídia e estáticos gerados
 media/
 staticfiles/
-
-# Logs
 *.log
-
-# Env
 .env

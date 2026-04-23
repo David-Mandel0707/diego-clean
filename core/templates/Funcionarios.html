@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Funcionários — DiegoClean{% endblock %}
+
+{% block content %}
+<style>
+  .func-item {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .func-item.inativo { opacity: .55; }
+
+  .func-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .func-item.inativo .func-avatar {
+    background: var(--bg);
+    color: var(--text-muted);
+  }
+
+  .func-info { flex: 1; min-width: 0; }
+
+  .func-nome {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .func-username {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .func-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .18s, color .18s;
+  }
+
+  .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-icon.danger:hover { border-color: #dc2626; color: #dc2626; }
+  .btn-icon.success:hover { border-color: #16a34a; color: #16a34a; }
+
+  .empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 40px 0;
+  }
+</style>
+
+<div class="section-header">
+  <span class="section-title">Funcionários</span>
+  <a href="{% url 'novo_funcionario' %}" class="btn-primary">
+    <i class="fa-solid fa-plus"></i> Novo
+  </a>
+</div>
+
+{% for func in page %}
+<div class="func-item {% if not func.is_active %}inativo{% endif %}">
+  <div class="func-avatar">{{ func.first_name|first|default:func.username|first|upper }}</div>
+  <div class="func-info">
+    <div class="func-nome">
+      {{ func.get_full_name|default:func.username }}
+      {% if not func.is_active %}
+        <span class="badge badge-red" style="font-size:10px;margin-left:6px;">Inativo</span>
+      {% endif %}
+    </div>
+    <div class="func-username">@{{ func.username }}</div>
+  </div>
+  <div class="func-actions">
+    <a href="{% url 'editar_funcionario' func.pk %}" class="btn-icon" title="Editar">
+      <i class="fa-solid fa-pen-to-square"></i>
+    </a>
+    <form method="POST" action="{% url 'toggle_funcionario' func.pk %}">
+      {% csrf_token %}
+      {% if func.is_active %}
+        <button type="submit" class="btn-icon danger" title="Desabilitar login">
+          <i class="fa-solid fa-ban"></i>
+        </button>
+      {% else %}
+        <button type="submit" class="btn-icon success" title="Habilitar login">
+          <i class="fa-solid fa-circle-check"></i>
+        </button>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% empty %}
+<div class="empty">Nenhum funcionário cadastrado.</div>
+{% endfor %}
+
+{% if page.paginator.num_pages > 1 %}
+<div class="pagination">
+  {% if page.has_previous %}
+    <a href="?page={{ page.previous_page_number }}" class="page-btn">
+  {% else %}
+    <a class="page-btn disabled">
+  {% endif %}
+    <i class="fa-solid fa-chevron-left"></i>
+  </a>
+  {% for num in page.paginator.page_range %}
+    <a href="?page={{ num }}" class="page-btn {% if num == page.number %}active{% endif %}">{{ num }}</a>
+  {% endfor %}
+  {% if page.has_next %}
+    <a href="?page={{ page.next_page_number }}" class="page-btn">
+  {% else %}
+    <a class="page-btn disabled">
+  {% endif %}
+    <i class="fa-solid fa-chevron-right"></i>
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}
