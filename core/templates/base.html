@@ -1,93 +1,211 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}DiegoClean{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    {% load static %}
+    <title>{% block title %}DiegoClean{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    .logo-empresa {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        justify-content: flex-start;
-        height: 190vh;
-        padding: 5px;
-        text-align: right;
-    }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 65px;
-        background: linear-gradient(to right, #6ec1e4, #4aa3d8);
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        border-top-left-radius: 20px;
-        border-top-right-radius: 20px;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        z-index: 1000;
-    }
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #eff6ff;
+            --surface: #ffffff;
+            --bg: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --nav-h: 68px;
+            --radius: 16px;
+        }
 
-    .nav-item img {
-        width: 22px;
-        height: 22px;
-        opacity: 0.8;
-        transition: 0.2s;
-    }
+        html, body {
+            height: 100%;
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
 
-    .nav-item.active img {
-        opacity: 1;
-    }
+        body {
+            padding-bottom: calc(var(--nav-h) + 16px);
+        }
 
-    .nav-item.center {
-        background: #3498DB;
-        width: 55px;
-        height: 55px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: -25px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
 
-    .nav-item.center img {
-        width: 26px;
-        height: 26px;
-        opacity: 1;
-    }
+        .topbar-logo {
+            height: 36px;
+            width: auto;
+        }
 
-    body {
-        padding-bottom: 80px;
-    }
+        .topbar-greeting {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .main-content {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-h);
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 8px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+            z-index: 200;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 12px;
+            transition: color .2s, background .2s;
+            flex: 1;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            transition: transform .2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .nav-item:hover i,
+        .nav-item.active i {
+            transform: translateY(-1px);
+        }
+
+        .nav-item.center-btn {
+            flex: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            margin-top: -20px;
+            padding: 0;
+            box-shadow: 0 4px 14px rgba(59,130,246,.45);
+            font-size: 0;
+            gap: 0;
+            justify-content: center;
+        }
+
+        .nav-item.center-btn i {
+            font-size: 22px;
+            color: #fff;
+        }
+
+        .nav-item.center-btn:hover,
+        .nav-item.center-btn.active {
+            background: var(--primary-dark);
+            color: #fff;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 20px;
+            box-shadow: 0 1px 6px rgba(0,0,0,.04);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-green  { background: #dcfce7; color: #16a34a; }
+        .badge-red    { background: #fee2e2; color: #dc2626; }
+        .badge-yellow { background: #fef9c3; color: #ca8a04; }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
 
+<header class="topbar">
+    <img src="{% static 'Colored-Logo.svg' %}" alt="DiegoClean" class="topbar-logo">
+    <span class="topbar-greeting">Olá, Diego 👋</span>
+</header>
+
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
 <nav class="bottom-nav">
-    <a class="logo-empresa">
-        <img src="logo diegoclean.png" alt="DiegoClean">
-    </a>
-    <a href="#" class="nav-item active">
-        <img src="{% static 'icons/home.svg' %}" alt="">
+    <a href="{% url 'home' %}" class="nav-item active">
+        <i class="fa-solid fa-house"></i>
+        <span>Início</span>
     </a>
     <a href="#" class="nav-item">
-        <img src="{% static 'icons/list.svg' %}" alt="">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Serviços</span>
+    </a>
+    <a href="#" class="nav-item center-btn">
+        <i class="fa-solid fa-calendar-days"></i>
     </a>
     <a href="#" class="nav-item">
-        <img src="{% static 'icons/chart.svg' %}" alt="">
+        <i class="fa-solid fa-chart-bar"></i>
+        <span>Relatórios</span>
     </a>
     <a href="#" class="nav-item">
-        <img src="{% static 'icons/user.svg' %}" alt="">
+        <i class="fa-solid fa-user"></i>
+        <span>Perfil</span>
     </a>
 </nav>
-
-{% block content %}{% endblock %}
 
 </body>
 </html>
