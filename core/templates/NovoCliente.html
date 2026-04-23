@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Cliente — DiegoClean{% endblock %}
+
+{% block content %}
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+
+  .back-link:hover { color: var(--primary); }
+
+  .campo { margin-bottom: 20px; }
+
+  .campo label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .campo input,
+  .campo textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color .18s;
+    resize: none;
+  }
+
+  .campo input:focus,
+  .campo textarea:focus { border-color: var(--primary); }
+
+  .campo input::placeholder,
+  .campo textarea::placeholder { color: #c0c7d0; }
+
+  .btn-salvar {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .18s, transform .1s;
+    margin-top: 8px;
+  }
+
+  .btn-salvar:hover  { background: var(--primary-dark); }
+  .btn-salvar:active { transform: scale(0.98); }
+</style>
+
+<a href="{% url 'clientes' %}" class="back-link">
+  <i class="fa-solid fa-chevron-left"></i> Clientes
+</a>
+
+<div class="section-title" style="margin-bottom:20px;">Novo Cliente</div>
+
+<div class="card">
+  <form method="POST">
+    {% csrf_token %}
+
+    <div class="campo">
+      <label for="nome">Nome *</label>
+      <input type="text" id="nome" name="nome" placeholder="Nome completo" required autofocus>
+    </div>
+
+    <div class="campo">
+      <label for="telefone">Telefone</label>
+      <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999">
+    </div>
+
+    <div class="campo">
+      <label for="endereco">Endereço</label>
+      <input type="text" id="endereco" name="endereco" placeholder="Rua, número, bairro">
+    </div>
+
+    <div class="campo">
+      <label for="observacoes">Observações</label>
+      <textarea id="observacoes" name="observacoes" rows="3" placeholder="Informações adicionais..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-salvar">Salvar cliente</button>
+  </form>
+</div>
+
+{% endblock %}

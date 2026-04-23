@@ -216,20 +216,20 @@
 </main>
 
 <nav class="bottom-nav">
-    <a href="{% url 'home' %}" class="nav-item active">
+    <a href="{% url 'home' %}" class="nav-item">
         <i class="fa-solid fa-house"></i>
         <span>Início</span>
     </a>
-    <a href="#" class="nav-item">
-        <i class="fa-solid fa-list-check"></i>
-        <span>Serviços</span>
+    <a href="{% url 'clientes' %}" class="nav-item">
+        <i class="fa-solid fa-users"></i>
+        <span>Clientes</span>
     </a>
-    <a href="#" class="nav-item center-btn">
-        <i class="fa-solid fa-calendar-days"></i>
+    <a href="{% url 'novo_servico' %}" class="nav-item center-btn">
+        <i class="fa-solid fa-plus"></i>
     </a>
-    <a href="#" class="nav-item">
-        <i class="fa-solid fa-chart-bar"></i>
-        <span>Relatórios</span>
+    <a href="{% url 'novo_cliente' %}" class="nav-item">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Novo cliente</span>
     </a>
     <a href="#" class="nav-item">
         <i class="fa-solid fa-user"></i>

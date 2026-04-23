@@ -1,52 +1,175 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}DiegoClean{% endblock %}
+{% block title %}Dashboard — DiegoClean{% endblock %}
 
 {% block content %}
-
 <style>
-.button {
-    display: block;
-    width: 200px;
-    padding: 14px;
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .stat-card .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .stat-card .value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-card .value.green { color: #16a34a; }
+  .stat-card .value.blue  { color: var(--primary); }
+
+  .stat-card .icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary);
+    color: #fff;
     border: none;
-    border-radius: 12px;
-    background-color: #2ecc71;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    margin-bottom: 20px;
-}
+    text-decoration: none;
+    transition: background .18s;
+  }
+
+  .btn-primary:hover { background: var(--primary-dark); }
+
+  .servico-item {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .servico-info { flex: 1; min-width: 0; }
+
+  .servico-nome {
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .servico-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .servico-valor {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .status-form { display: flex; }
+
+  .btn-pagar {
+    background: #dcfce7;
+    color: #16a34a;
+    border: none;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .18s;
+  }
+
+  .btn-pagar:hover { background: #bbf7d0; }
+
+  .empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 32px 0;
+  }
 </style>
 
-<input type="button" value="Cadastrar Serviço" class="button">
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="icon">💰</span>
+    <span class="label">Faturamento do mês</span>
+    <span class="value green">R$ {{ faturamento_mes }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="icon">⏳</span>
+    <span class="label">Pendentes</span>
+    <span class="value blue">{{ pendentes_count }}</span>
+  </div>
+  <div class="stat-card" style="grid-column: span 2;">
+    <span class="icon">👥</span>
+    <span class="label">Clientes cadastrados</span>
+    <span class="value">{{ clientes_count }}</span>
+  </div>
+</div>
 
-<h2>Clientes</h2>
+<div class="section-header">
+  <span class="section-title">Pendentes</span>
+  <a href="{% url 'novo_servico' %}" class="btn-primary">
+    <i class="fa-solid fa-plus"></i> Novo serviço
+  </a>
+</div>
 
-<table border="1">
-    <tr>
-        <th>Nome</th>
-        <th>Descrição</th>
-        <th>Data</th>
-        <th>Valor</th>
-        <th>Status Pagamento</th>
-    </tr>
-
-    {% for servico in servicos %}
-    <tr>
-        <td>{{ servico.cliente.nome }}</td>
-        <td>{{ servico.descricao }}</td>
-        <td>{{ servico.data }}</td>
-        <td>{{ servico.valor }}</td>
-        <td>{{ servico.get_status_pagamento_display }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="5">Nenhum serviço cadastrado.</td>
-    </tr>
-    {% endfor %}
-</table>
+{% for servico in servicos_pendentes %}
+<div class="servico-item">
+  <div class="servico-info">
+    <div class="servico-nome">{{ servico.cliente.nome }}</div>
+    <div class="servico-meta">{{ servico.data }} {% if servico.descricao %}· {{ servico.descricao|truncatechars:30 }}{% endif %}</div>
+  </div>
+  <span class="servico-valor">R$ {{ servico.valor }}</span>
+  <form class="status-form" method="POST" action="{% url 'atualizar_status' servico.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="status" value="pago">
+    <input type="hidden" name="next" value="{% url 'home' %}">
+    <button type="submit" class="btn-pagar">Pago</button>
+  </form>
+</div>
+{% empty %}
+<div class="empty">Nenhum serviço pendente 🎉</div>
+{% endfor %}
 
 {% endblock %}
