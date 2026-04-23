@@ -17,9 +17,9 @@ Including another URLconf
 from django.contrib.auth import views as auth_views
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 
 urlpatterns = [
-    path('', views.login, name='login'),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     # path('diretores/', include('diretores.urls')),
@@ -29,4 +29,6 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset_done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('', views.lista_clientes, name='lista_clientes'),
+    path('', lambda request: redirect('accounts/login/')),
+    path('core/', include('core.urls')),
 ]

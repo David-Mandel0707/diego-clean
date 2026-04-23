@@ -25,3 +25,8 @@ def login(request):
 def lista_clientes(request):
     clientes = cliente.objects.all()
     return render(request, 'clientes.html', {'clientes': clientes})
+    if request.user.is_authenticated:
+        return HttpResponse("Site funcionando")
+    if request.method=='POST':
+        return HttpResponse("Site funcionando")
+    return render(request, 'login.html')  
