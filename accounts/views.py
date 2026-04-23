@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login as auth_login
 
 def login(request):
     if request.user.is_authenticated:
-        return redirect('Home.html')
+        return redirect('home')
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -18,21 +18,8 @@ def login(request):
 
         if user is not None:
             auth_login(request, user)
-            return redirect('Home.html')
+            return redirect('home')
         else:
             return render(request, 'login.html', {'error': 'Usuário ou senha inválidos'})
-
-    return render(request, 'login.html')
-
-
-def lista_clientes(request):
-    clientes = Cliente.objects.all()
-    return render(request, 'clientes.html', {'clientes': clientes})
-
-    if request.user.is_authenticated:
-        return HttpResponse("Site funcionando")
-
-    if request.method == 'POST':
-        return HttpResponse("Site funcionando")
 
     return render(request, 'login.html')

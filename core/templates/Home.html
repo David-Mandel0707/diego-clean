@@ -28,19 +28,23 @@
 <table border="1">
     <tr>
         <th>Nome</th>
-        <th>Serviço</th>
+        <th>Descrição</th>
         <th>Data</th>
         <th>Valor</th>
         <th>Status Pagamento</th>
     </tr>
 
-    {% for cliente in clientes %}
+    {% for servico in servicos %}
     <tr>
-        <td>{{ cliente.nome }}</td>
-        <td>{{ cliente.servico }}</td>
-        <td>{{ cliente.data }}</td>
-        <td>{{ cliente.valor }}</td>
-        <td>{{ cliente.status }}</td>
+        <td>{{ servico.cliente.nome }}</td>
+        <td>{{ servico.descricao }}</td>
+        <td>{{ servico.data }}</td>
+        <td>{{ servico.valor }}</td>
+        <td>{{ servico.get_status_pagamento_display }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">Nenhum serviço cadastrado.</td>
     </tr>
     {% endfor %}
 </table>

@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from django.contrib.auth.decorators import login_required
-from .models import Cliente
+from .models import Servico
 
 def lista_clientes(request):
-    clientes = Cliente.objects.all()
-    return render(request, 'Home.html', {'clientes': clientes})
+    servicos = Servico.objects.select_related('cliente').all()
+    return render(request, 'Home.html', {'servicos': servicos})
 
 def home(request):
-    return HttpResponse("App funcionando")
+    return lista_clientes(request)
