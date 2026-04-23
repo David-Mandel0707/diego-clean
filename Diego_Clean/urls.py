@@ -10,7 +10,7 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset_done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-    path('', lambda _: redirect('login/')),
+    path('', lambda _: redirect('/login/')),
     
     path('home/', include('core.urls')),
     path('login/', include('accounts.urls')),
