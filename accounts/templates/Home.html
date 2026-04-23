@@ -4,6 +4,7 @@
 
 <head>
     {% load static %}
+    <title>Lista de Clientes</title>
 <style>
     .create-service {
         align-itens: center;
@@ -25,4 +26,18 @@
 <body>
         <div class="create-service">
     </div>
+    <h1>Clientes</h1>
+    <table border="1">
+        <tr>
+            <th>Nome</th>
+            <th>Email</th>
+        </tr>
+
+        {% for cliente in clientes %}
+        <tr>
+            <td>{{ cliente.nome }}</td>
+            <td>{{ cliente.email }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
