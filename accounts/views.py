@@ -22,4 +22,4 @@ def login(request):
         else:
             return render(request, 'Login.html', {'error': 'Usuário ou senha inválidos'})
 
-    return render(request, 'Login.html')
+    return render(request, 'login.html')
