@@ -2,8 +2,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .models import cliente
-from django.contrib.auth import authenticate, login
+from core.models import Cliente
+from django.contrib.auth import authenticate, login as auth_login
 
 
 def login(request):
@@ -17,7 +17,7 @@ def login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request, user)
+            auth_login(request, user)
             return redirect('Home.html')
         else:
             return render(request, 'login.html', {'error': 'Usuário ou senha inválidos'})
@@ -26,7 +26,7 @@ def login(request):
 
 
 def lista_clientes(request):
-    clientes = cliente.objects.all()
+    clientes = Cliente.objects.all()
     return render(request, 'clientes.html', {'clientes': clientes})
 
     if request.user.is_authenticated:
