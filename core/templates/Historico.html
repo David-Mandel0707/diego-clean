@@ -84,6 +84,87 @@
   .page-btn:hover { border-color: var(--primary); color: var(--primary); }
   .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
   .page-btn.disabled { opacity: .35; pointer-events: none; }
+
+  .filtro-form {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .filtro-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 70px;
+  }
+
+  .filtro-campo label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .filtro-campo input {
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color .18s;
+    width: 100%;
+  }
+
+  .filtro-campo input:focus { border-color: var(--primary); }
+
+  .filtro-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-filtrar {
+    padding: 10px 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .18s;
+  }
+
+  .btn-filtrar:hover { background: var(--primary-dark); }
+
+  .btn-limpar {
+    padding: 10px 14px;
+    background: none;
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color .18s, color .18s;
+  }
+
+  .btn-limpar:hover { border-color: #dc2626; color: #dc2626; }
 </style>
 
 <div class="section-title">
@@ -107,6 +188,21 @@
     <span class="value">{{ total_servicos }}</span>
   </div>
 </div>
+
+<form class="filtro-form" method="GET">
+  <div class="filtro-campo">
+    <label for="de">De</label>
+    <input type="date" id="de" name="de" value="{{ filtro.de }}">
+  </div>
+  <div class="filtro-campo">
+    <label for="ate">Até</label>
+    <input type="date" id="ate" name="ate" value="{{ filtro.ate }}">
+  </div>
+  <div class="filtro-actions">
+    <button type="submit" class="btn-filtrar"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <a href="{% url 'historico' %}" class="btn-limpar"><i class="fa-solid fa-xmark"></i></a>
+  </div>
+</form>
 
 <div class="table-wrapper">
   <table>

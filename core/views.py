@@ -81,11 +81,21 @@ def novo_servico(request: HttpRequest):
 @_login_required
 def historico(request: HttpRequest):
     qs = Servico.objects.select_related('cliente', 'funcionario').all()
-    data_hist = list(qs.values('cliente__nome', 'funcionario__username', 'funcionario__first_name', 'funcionario__last_name', 'data', 'descricao', 'valor', 'status_pagamento'))
+
+    de = request.GET.get('de', '').strip()
+    ate = request.GET.get('ate', '').strip()
+
+    if de:
+        qs = qs.filter(data__gte=de)
+    if ate:
+        qs = qs.filter(data__lte=ate)
+
+    data_hist = list(qs.values('valor', 'status_pagamento'))
     df = pd.DataFrame(data_hist)
     total_faturado = float(df.loc[df['status_pagamento'] == Servico.PAGO, 'valor'].sum()) if not df.empty else 0.0
     total_servicos = len(df) if not df.empty else 0
     total_pendentes = int(df[df['status_pagamento'] == Servico.PENDENTE].shape[0]) if not df.empty else 0
+
     paginator = Paginator(qs, 10)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'Historico.html', {
@@ -93,6 +103,7 @@ def historico(request: HttpRequest):
         'total_faturado': total_faturado,
         'total_servicos': total_servicos,
         'total_pendentes': total_pendentes,
+        'filtro': {'de': de, 'ate': ate},
     })
 
 
