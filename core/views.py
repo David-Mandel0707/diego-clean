@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
 import pandas as pd
+import plotly.graph_objects as go
 from .models import Servico, Cliente
 
 
@@ -26,11 +27,83 @@ def home(request: HttpRequest):
     clientes_count = Cliente.objects.count()
     paginator = Paginator(qs_pendentes, 5)
     page_pendentes = paginator.get_page(request.GET.get('page'))
+
+    grafico_pizza = None
+    grafico_mensal = None
+    grafico_anual = None
+    if request.user.is_superuser:
+        counts = {s: 0 for s in [Servico.PAGO, Servico.PENDENTE, Servico.CANCELADO]}
+        for row in Servico.objects.values('status_pagamento'):
+            counts[row['status_pagamento']] = counts.get(row['status_pagamento'], 0) + 1
+        fig_pizza = go.Figure(go.Pie(
+            labels=['Realizados (Pago)', 'Pendentes', 'Cancelados'],
+            values=[counts[Servico.PAGO], counts[Servico.PENDENTE], counts[Servico.CANCELADO]],
+            marker_colors=['#16a34a', '#2563eb', '#dc2626'],
+            hole=0.35,
+            textinfo='label+percent',
+        ))
+        fig_pizza.update_layout(
+            margin=dict(t=20, b=20, l=20, r=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            showlegend=False,
+            font=dict(family='inherit', size=13),
+        )
+        grafico_pizza = fig_pizza.to_html(full_html=False, include_plotlyjs='cdn', config={'displayModeBar': False})
+
+        MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        vendas_mes = {m: 0.0 for m in range(1, 13)}
+        for row in Servico.objects.filter(status_pagamento=Servico.PAGO, data__year=hoje.year).values('data__month', 'valor'):
+            vendas_mes[row['data__month']] += float(row['valor'])
+        fig_mensal = go.Figure(go.Bar(
+            x=MESES,
+            y=[vendas_mes[m] for m in range(1, 13)],
+            marker_color='#2563eb',
+            text=[f'R$ {v:,.2f}' for v in [vendas_mes[m] for m in range(1, 13)]],
+            textposition='outside',
+        ))
+        fig_mensal.update_layout(
+            margin=dict(t=20, b=40, l=60, r=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
+            xaxis=dict(gridcolor='rgba(0,0,0,0)'),
+            font=dict(family='inherit', size=12),
+            height=280,
+        )
+        grafico_mensal = fig_mensal.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False})
+
+        vendas_ano: dict[int, float] = {}
+        for row in Servico.objects.filter(status_pagamento=Servico.PAGO).values('data__year', 'valor'):
+            vendas_ano[row['data__year']] = vendas_ano.get(row['data__year'], 0.0) + float(row['valor'])
+        anos_sorted = sorted(vendas_ano.keys())
+        fig_anual = go.Figure(go.Bar(
+            x=[str(a) for a in anos_sorted],
+            y=[vendas_ano[a] for a in anos_sorted],
+            marker_color='#16a34a',
+            text=[f'R$ {vendas_ano[a]:,.2f}' for a in anos_sorted],
+            textposition='outside',
+        ))
+        fig_anual.update_layout(
+            margin=dict(t=20, b=40, l=60, r=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
+            xaxis=dict(gridcolor='rgba(0,0,0,0)', type='category'),
+            font=dict(family='inherit', size=12),
+            height=280,
+        )
+        grafico_anual = fig_anual.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False})
+
     return render(request, 'Home.html', {
         'page_pendentes': page_pendentes,
         'faturamento_mes': faturamento_mes,
         'pendentes_count': pendentes_count,
         'clientes_count': clientes_count,
+        'grafico_pizza': grafico_pizza,
+        'grafico_mensal': grafico_mensal,
+        'grafico_anual': grafico_anual,
+        'hoje': hoje,
     })
 
 

@@ -66,6 +66,11 @@
 
 </style>
 
+<div style="margin-bottom:24px;">
+  <div style="font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:4px;">Bem-vindo de volta</div>
+  <div style="font-size:26px;font-weight:700;color:var(--text);">Olá, {{ request.user.get_full_name|default:request.user.username }} 👋</div>
+</div>
+
 <div class="stats-grid">
   <div class="stat-card">
     <i class="fa-solid fa-money-bill-wave icon"></i>
@@ -83,6 +88,36 @@
     <span class="value">{{ clientes_count }}</span>
   </div>
 </div>
+
+{% if grafico_pizza %}
+<div style="margin-bottom:28px;">
+  <div class="section-header" style="margin-bottom:12px;">
+    <span class="section-title">Serviços por status</span>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
+    {{ grafico_pizza|safe }}
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
+  <div>
+    <div class="section-header" style="margin-bottom:12px;">
+      <span class="section-title">Vendas por mês ({{ hoje.year }})</span>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
+      {{ grafico_mensal|safe }}
+    </div>
+  </div>
+  <div>
+    <div class="section-header" style="margin-bottom:12px;">
+      <span class="section-title">Vendas por ano</span>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
+      {{ grafico_anual|safe }}
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <div class="section-header">
   <span class="section-title">Pendentes</span>
