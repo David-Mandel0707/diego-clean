@@ -66,11 +66,10 @@ def home(request: HttpRequest):
         status_pagamento=Servico.PENDENTE, funcionario=request.user
     ).order_by('-data')
 
-    faturamento_mes = float(
-        Servico.objects.filter(
-            status_pagamento=Servico.PAGO, data__year=hoje.year, data__month=hoje.month
-        ).aggregate(total=Sum('valor'))['total'] or 0
-    )
+    _qs_fat = Servico.objects.filter(status_pagamento=Servico.PAGO, data__year=hoje.year, data__month=hoje.month)
+    if not request.user.is_superuser:
+        _qs_fat = _qs_fat.filter(funcionario=request.user)
+    faturamento_mes = float(_qs_fat.aggregate(total=Sum('valor'))['total'] or 0)
     pendentes_count = qs_pendentes.count()
     clientes_count = Cliente.objects.count()
     paginator = Paginator(qs_pendentes, 5)
