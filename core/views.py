@@ -1,152 +1,113 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpRequest
+from django.http import HttpRequest, Http404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
+from django.db.models import Sum, Count, Q
 from django.utils import timezone
-import pandas as pd
 import plotly.graph_objects as go
 from .models import Servico, Cliente
-from django.contrib.auth import get_user_model
-from django.http import Http404
 
 def _login_required(view):
     return login_required(login_url='/login/')(view)
 
+
+MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+
+_BAR_LAYOUT = dict(
+    margin=dict(t=20, b=40, l=60, r=20),
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
+    font=dict(family='inherit', size=12),
+    height=280,
+    autosize=True,
+)
+
+def _bar_html(fig, include_plotlyjs):
+    return fig.to_html(full_html=False, include_plotlyjs=include_plotlyjs, config={'displayModeBar': False, 'responsive': True})
+
+def _vendas_por_mes(qs_pago_ano):
+    totais = {m: 0.0 for m in range(1, 13)}
+    for row in qs_pago_ano.values('data__month').annotate(total=Sum('valor')):
+        totais[row['data__month']] = float(row['total'])
+    return totais
+
+def _vendas_por_ano(qs_pago):
+    result = {}
+    for row in qs_pago.values('data__year').annotate(total=Sum('valor')).order_by('data__year'):
+        result[row['data__year']] = float(row['total'])
+    return result
+
+def _grafico_mensal(vendas, include_plotlyjs):
+    valores = [vendas[m] for m in range(1, 13)]
+    fig = go.Figure(go.Bar(
+        x=MESES, y=valores, marker_color='#3498db',
+        text=[f'R$ {v:,.2f}' for v in valores], textposition='outside',
+    ))
+    fig.update_layout(**_BAR_LAYOUT, xaxis=dict(gridcolor='rgba(0,0,0,0)'))
+    return _bar_html(fig, include_plotlyjs)
+
+def _grafico_anual(vendas, include_plotlyjs):
+    anos = sorted(vendas.keys())
+    fig = go.Figure(go.Bar(
+        x=[str(a) for a in anos], y=[vendas[a] for a in anos], marker_color='#2ecc71',
+        text=[f'R$ {vendas[a]:,.2f}' for a in anos], textposition='outside',
+    ))
+    fig.update_layout(**_BAR_LAYOUT, xaxis=dict(gridcolor='rgba(0,0,0,0)', type='category'))
+    return _bar_html(fig, include_plotlyjs)
+
+
 @_login_required
 def home(request: HttpRequest):
     hoje = timezone.now().date()
-    
-    qs_pendentes = Servico.objects.select_related('cliente').filter(status_pagamento=Servico.PENDENTE, funcionario=request.user).order_by('-data')
-    data_mes = list(Servico.objects.filter(
-        status_pagamento=Servico.PAGO,
-        data__year=hoje.year,
-        data__month=hoje.month,
-    ).values('valor'))
-    df_mes = pd.DataFrame(data_mes)
-    faturamento_mes = float(df_mes['valor'].sum()) if not df_mes.empty else 0.0
+
+    qs_pendentes = Servico.objects.select_related('cliente').filter(
+        status_pagamento=Servico.PENDENTE, funcionario=request.user
+    ).order_by('-data')
+
+    faturamento_mes = float(
+        Servico.objects.filter(
+            status_pagamento=Servico.PAGO, data__year=hoje.year, data__month=hoje.month
+        ).aggregate(total=Sum('valor'))['total'] or 0
+    )
     pendentes_count = qs_pendentes.count()
     clientes_count = Cliente.objects.count()
     paginator = Paginator(qs_pendentes, 5)
     page_pendentes = paginator.get_page(request.GET.get('page'))
 
-    grafico_pizza = None
-    grafico_mensal = None
-    grafico_anual = None
-    grafico_mensal_proprio = None
-    grafico_anual_proprio = None
-
-    MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+    grafico_pizza = grafico_mensal = grafico_anual = None
+    grafico_mensal_proprio = grafico_anual_proprio = None
 
     if not request.user.is_superuser:
-        vendas_mes_proprio = {m: 0.0 for m in range(1, 13)}
-        for row in Servico.objects.filter(status_pagamento=Servico.PAGO, funcionario=request.user, data__year=hoje.year).values('data__month', 'valor'):
-            vendas_mes_proprio[row['data__month']] += float(row['valor'])
-        fig_mp = go.Figure(go.Bar(
-            x=MESES,
-            y=[vendas_mes_proprio[m] for m in range(1, 13)],
-            marker_color='#2563eb',
-            text=[f'R$ {v:,.2f}' for v in [vendas_mes_proprio[m] for m in range(1, 13)]],
-            textposition='outside',
-        ))
-        fig_mp.update_layout(
-            margin=dict(t=20, b=40, l=60, r=20),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
-            xaxis=dict(gridcolor='rgba(0,0,0,0)'),
-            font=dict(family='inherit', size=12),
-            height=280,
-            autosize=True,
+        qs_pago_proprio = Servico.objects.filter(status_pagamento=Servico.PAGO, funcionario=request.user)
+        grafico_mensal_proprio = _grafico_mensal(
+            _vendas_por_mes(qs_pago_proprio.filter(data__year=hoje.year)), 'cdn'
         )
-        grafico_mensal_proprio = fig_mp.to_html(full_html=False, include_plotlyjs='cdn', config={'displayModeBar': False, 'responsive': True})
-
-        vendas_ano_proprio: dict[int, float] = {}
-        for row in Servico.objects.filter(status_pagamento=Servico.PAGO, funcionario=request.user).values('data__year', 'valor'):
-            vendas_ano_proprio[row['data__year']] = vendas_ano_proprio.get(row['data__year'], 0.0) + float(row['valor'])
-        anos_sorted_proprio = sorted(vendas_ano_proprio.keys())
-        fig_ap = go.Figure(go.Bar(
-            x=[str(a) for a in anos_sorted_proprio],
-            y=[vendas_ano_proprio[a] for a in anos_sorted_proprio],
-            marker_color='#16a34a',
-            text=[f'R$ {vendas_ano_proprio[a]:,.2f}' for a in anos_sorted_proprio],
-            textposition='outside',
-        ))
-        fig_ap.update_layout(
-            margin=dict(t=20, b=40, l=60, r=20),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
-            xaxis=dict(gridcolor='rgba(0,0,0,0)', type='category'),
-            font=dict(family='inherit', size=12),
-            height=280,
-            autosize=True,
-        )
-        grafico_anual_proprio = fig_ap.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False, 'responsive': True})
+        grafico_anual_proprio = _grafico_anual(_vendas_por_ano(qs_pago_proprio), False)
 
     if request.user.is_superuser:
-        counts = {s: 0 for s in [Servico.PAGO, Servico.PENDENTE, Servico.CANCELADO]}
-        for row in Servico.objects.values('status_pagamento'):
-            counts[row['status_pagamento']] = counts.get(row['status_pagamento'], 0) + 1
+        counts = Servico.objects.aggregate(
+            pago=Count('pk', filter=Q(status_pagamento=Servico.PAGO)),
+            pendente=Count('pk', filter=Q(status_pagamento=Servico.PENDENTE)),
+            cancelado=Count('pk', filter=Q(status_pagamento=Servico.CANCELADO)),
+        )
         fig_pizza = go.Figure(go.Pie(
             labels=['Realizados (Pago)', 'Pendentes', 'Cancelados'],
-            values=[counts[Servico.PAGO], counts[Servico.PENDENTE], counts[Servico.CANCELADO]],
-            marker_colors=['#16a34a', '#2563eb', '#dc2626'],
-            hole=0.35,
-            textinfo='label+percent',
+            values=[counts['pago'], counts['pendente'], counts['cancelado']],
+            marker_colors=['#2ecc71', '#3498db', '#dc2626'],
+            hole=0.35, textinfo='label+percent',
         ))
         fig_pizza.update_layout(
             margin=dict(t=20, b=20, l=20, r=20),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            showlegend=False,
-            font=dict(family='inherit', size=13),
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            showlegend=False, font=dict(family='inherit', size=13),
         )
-        grafico_pizza = fig_pizza.to_html(full_html=False, include_plotlyjs='cdn', config={'displayModeBar': False, 'responsive': True})
+        grafico_pizza = _bar_html(fig_pizza, 'cdn')
 
-        vendas_mes = {m: 0.0 for m in range(1, 13)}
-        for row in Servico.objects.filter(status_pagamento=Servico.PAGO, data__year=hoje.year).values('data__month', 'valor'):
-            vendas_mes[row['data__month']] += float(row['valor'])
-        fig_mensal = go.Figure(go.Bar(
-            x=MESES,
-            y=[vendas_mes[m] for m in range(1, 13)],
-            marker_color='#2563eb',
-            text=[f'R$ {v:,.2f}' for v in [vendas_mes[m] for m in range(1, 13)]],
-            textposition='outside',
-        ))
-        fig_mensal.update_layout(
-            margin=dict(t=20, b=40, l=60, r=20),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
-            xaxis=dict(gridcolor='rgba(0,0,0,0)'),
-            font=dict(family='inherit', size=12),
-            height=280,
-            autosize=True,
-        )
-        grafico_mensal = fig_mensal.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False, 'responsive': True})
-
-        vendas_ano: dict[int, float] = {}
-        for row in Servico.objects.filter(status_pagamento=Servico.PAGO).values('data__year', 'valor'):
-            vendas_ano[row['data__year']] = vendas_ano.get(row['data__year'], 0.0) + float(row['valor'])
-        anos_sorted = sorted(vendas_ano.keys())
-        fig_anual = go.Figure(go.Bar(
-            x=[str(a) for a in anos_sorted],
-            y=[vendas_ano[a] for a in anos_sorted],
-            marker_color='#16a34a',
-            text=[f'R$ {vendas_ano[a]:,.2f}' for a in anos_sorted],
-            textposition='outside',
-        ))
-        fig_anual.update_layout(
-            margin=dict(t=20, b=40, l=60, r=20),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
-            xaxis=dict(gridcolor='rgba(0,0,0,0)', type='category'),
-            font=dict(family='inherit', size=12),
-            height=280,
-            autosize=True,
-        )
-        grafico_anual = fig_anual.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False, 'responsive': True})
+        qs_pago = Servico.objects.filter(status_pagamento=Servico.PAGO)
+        grafico_mensal = _grafico_mensal(_vendas_por_mes(qs_pago.filter(data__year=hoje.year)), False)
+        grafico_anual = _grafico_anual(_vendas_por_ano(qs_pago), False)
 
     return render(request, 'Home.html', {
         'page_pendentes': page_pendentes,
@@ -225,11 +186,14 @@ def historico(request: HttpRequest):
     User = get_user_model()
     vendedores = User.objects.filter(servicos__isnull=False).distinct().order_by('first_name', 'username')
 
-    data_hist = list(qs.values('valor', 'status_pagamento'))
-    df = pd.DataFrame(data_hist)
-    total_faturado = float(df.loc[df['status_pagamento'] == Servico.PAGO, 'valor'].sum()) if not df.empty else 0.0
-    total_servicos = len(df) if not df.empty else 0
-    total_pendentes = int(df[df['status_pagamento'] == Servico.PENDENTE].shape[0]) if not df.empty else 0
+    agg = qs.aggregate(
+        total_faturado=Sum('valor', filter=Q(status_pagamento=Servico.PAGO)),
+        total_servicos=Count('pk'),
+        total_pendentes=Count('pk', filter=Q(status_pagamento=Servico.PENDENTE)),
+    )
+    total_faturado = float(agg['total_faturado'] or 0)
+    total_servicos = agg['total_servicos']
+    total_pendentes = agg['total_pendentes']
 
     paginator = Paginator(qs, 10)
     page = paginator.get_page(request.GET.get('page'))
@@ -264,6 +228,7 @@ def funcionarios(request: HttpRequest):
     qs = User.objects.filter(is_superuser=False).order_by('first_name', 'username')
     paginator = Paginator(qs, 10)
     page = paginator.get_page(request.GET.get('page'))
+    
     return render(request, 'Funcionarios.html', {'page': page})
 
 def _superuser_required(view):
