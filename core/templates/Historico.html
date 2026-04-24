@@ -65,6 +65,12 @@
     padding: 16px;
     margin-bottom: 20px;
     display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filtro-linha {
+    display: flex;
     gap: 10px;
     align-items: flex-end;
     flex-wrap: wrap;
@@ -86,7 +92,8 @@
     letter-spacing: .04em;
   }
 
-  .filtro-campo input {
+  .filtro-campo input,
+  .filtro-campo select {
     padding: 10px 12px;
     border: 1.5px solid var(--border);
     border-radius: 10px;
@@ -99,7 +106,8 @@
     width: 100%;
   }
 
-  .filtro-campo input:focus { border-color: var(--primary); }
+  .filtro-campo input:focus,
+  .filtro-campo select:focus { border-color: var(--primary); }
 
   .filtro-actions {
     display: flex;
@@ -163,17 +171,39 @@
 </div>
 
 <form class="filtro-form" method="GET">
-  <div class="filtro-campo">
-    <label for="de">De</label>
-    <input type="date" id="de" name="de" value="{{ filtro.de }}">
+  <div class="filtro-linha">
+    <div class="filtro-campo">
+      <label for="de">De</label>
+      <input type="date" id="de" name="de" value="{{ filtro.de }}">
+    </div>
+    <div class="filtro-campo">
+      <label for="ate">Até</label>
+      <input type="date" id="ate" name="ate" value="{{ filtro.ate }}">
+    </div>
   </div>
-  <div class="filtro-campo">
-    <label for="ate">Até</label>
-    <input type="date" id="ate" name="ate" value="{{ filtro.ate }}">
-  </div>
-  <div class="filtro-actions">
-    <button type="submit" class="btn-filtrar"><i class="fa-solid fa-magnifying-glass"></i></button>
-    <a href="{% url 'historico' %}" class="btn-limpar"><i class="fa-solid fa-xmark"></i></a>
+  <div class="filtro-linha">
+    <div class="filtro-campo" style="max-width:200px;">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="" {% if not filtro.status %}selected{% endif %}>Todos</option>
+        <option value="pago" {% if filtro.status == 'pago' %}selected{% endif %}>Pago</option>
+        <option value="pendente" {% if filtro.status == 'pendente' %}selected{% endif %}>Pendente</option>
+        <option value="cancelado" {% if filtro.status == 'cancelado' %}selected{% endif %}>Cancelado</option>
+      </select>
+    </div>
+    <div class="filtro-campo" style="max-width:220px;">
+      <label for="vendedor">Vendedor</label>
+      <select id="vendedor" name="vendedor">
+        <option value="" {% if not filtro.vendedor %}selected{% endif %}>Todos</option>
+        {% for v in vendedores %}
+        <option value="{{ v.pk }}" {% if filtro.vendedor == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filtro-actions">
+      <button type="submit" class="btn-filtrar"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <a href="{% url 'historico' %}" class="btn-limpar"><i class="fa-solid fa-xmark"></i></a>
+    </div>
   </div>
 </form>
 
@@ -229,7 +259,7 @@
 {% if page.paginator.num_pages > 1 %}
 <div class="pagination">
   {% if page.has_previous %}
-    <a href="?page={{ page.previous_page_number }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}" class="page-btn">
+    <a href="?page={{ page.previous_page_number }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}{% if filtro.status %}&status={{ filtro.status }}{% endif %}{% if filtro.vendedor %}&vendedor={{ filtro.vendedor }}{% endif %}" class="page-btn">
   {% else %}
     <a class="page-btn disabled">
   {% endif %}
@@ -237,11 +267,11 @@
   </a>
 
   {% for num in page.paginator.page_range %}
-    <a href="?page={{ num }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}" class="page-btn {% if num == page.number %}active{% endif %}">{{ num }}</a>
+    <a href="?page={{ num }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}{% if filtro.status %}&status={{ filtro.status }}{% endif %}{% if filtro.vendedor %}&vendedor={{ filtro.vendedor }}{% endif %}" class="page-btn {% if num == page.number %}active{% endif %}">{{ num }}</a>
   {% endfor %}
 
   {% if page.has_next %}
-    <a href="?page={{ page.next_page_number }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}" class="page-btn">
+    <a href="?page={{ page.next_page_number }}{% if filtro.de %}&de={{ filtro.de }}{% endif %}{% if filtro.ate %}&ate={{ filtro.ate }}{% endif %}{% if filtro.status %}&status={{ filtro.status }}{% endif %}{% if filtro.vendedor %}&vendedor={{ filtro.vendedor }}{% endif %}" class="page-btn">
   {% else %}
     <a class="page-btn disabled">
   {% endif %}

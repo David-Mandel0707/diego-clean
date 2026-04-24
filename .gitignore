@@ -3,7 +3,6 @@
 .env
 *.sqlite3
 db.sqlite3
-CLAUDE.md
 __pycache__/
 *.py[cod]
 *.pyo

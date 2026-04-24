@@ -6,15 +6,16 @@ from django.utils import timezone
 import pandas as pd
 import plotly.graph_objects as go
 from .models import Servico, Cliente
-
+from django.contrib.auth import get_user_model
+from django.http import Http404
 
 def _login_required(view):
     return login_required(login_url='/login/')(view)
 
-
 @_login_required
 def home(request: HttpRequest):
     hoje = timezone.now().date()
+    
     qs_pendentes = Servico.objects.select_related('cliente').filter(status_pagamento=Servico.PENDENTE, funcionario=request.user).order_by('-data')
     data_mes = list(Servico.objects.filter(
         status_pagamento=Servico.PAGO,
@@ -112,7 +113,6 @@ def clientes(request: HttpRequest):
     lista = Cliente.objects.all()
     return render(request, 'Clientes.html', {'clientes': lista})
 
-
 @_login_required
 def novo_cliente(request: HttpRequest):
     if request.method == 'POST':
@@ -125,13 +125,11 @@ def novo_cliente(request: HttpRequest):
             return redirect('clientes')
     return render(request, 'NovoCliente.html')
 
-
 @_login_required
 def cliente_detalhe(request: HttpRequest, pk: int):
     cliente = get_object_or_404(Cliente, pk=pk)
     servicos = cliente.servicos.all()
     return render(request, 'ClienteDetalhe.html', {'cliente': cliente, 'servicos': servicos})
-
 
 @_login_required
 def novo_servico(request: HttpRequest):
@@ -152,18 +150,26 @@ def novo_servico(request: HttpRequest):
         return redirect('home')
     return render(request, 'NovoServico.html', {'clientes': clientes_lista})
 
-
 @_login_required
 def historico(request: HttpRequest):
     qs = Servico.objects.select_related('cliente', 'funcionario').all()
 
     de = request.GET.get('de', '').strip()
     ate = request.GET.get('ate', '').strip()
+    status_filtro = request.GET.get('status', '').strip()
+    vendedor_id = request.GET.get('vendedor', '').strip()
 
     if de:
         qs = qs.filter(data__gte=de)
     if ate:
         qs = qs.filter(data__lte=ate)
+    if status_filtro in [Servico.PAGO, Servico.PENDENTE, Servico.CANCELADO]:
+        qs = qs.filter(status_pagamento=status_filtro)
+    if vendedor_id.isdigit():
+        qs = qs.filter(funcionario_id=int(vendedor_id))
+
+    User = get_user_model()
+    vendedores = User.objects.filter(servicos__isnull=False).distinct().order_by('first_name', 'username')
 
     data_hist = list(qs.values('valor', 'status_pagamento'))
     df = pd.DataFrame(data_hist)
@@ -178,9 +184,9 @@ def historico(request: HttpRequest):
         'total_faturado': total_faturado,
         'total_servicos': total_servicos,
         'total_pendentes': total_pendentes,
-        'filtro': {'de': de, 'ate': ate},
+        'filtro': {'de': de, 'ate': ate, 'status': status_filtro, 'vendedor': vendedor_id},
+        'vendedores': vendedores,
     })
-
 
 @_login_required
 def editar_cliente(request: HttpRequest, pk: int):
@@ -196,21 +202,17 @@ def editar_cliente(request: HttpRequest, pk: int):
             return redirect('cliente_detalhe', pk=pk)
     return render(request, 'EditarCliente.html', {'cliente': cliente})
 
-
 @_login_required
 def funcionarios(request: HttpRequest):
     if not request.user.is_superuser:
         return redirect('home')
-    from django.contrib.auth import get_user_model
     User = get_user_model()
     qs = User.objects.filter(is_superuser=False).order_by('first_name', 'username')
     paginator = Paginator(qs, 10)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'Funcionarios.html', {'page': page})
 
-
 def _superuser_required(view):
-    from django.http import Http404
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('/login/')
@@ -223,7 +225,6 @@ def _superuser_required(view):
 
 @_superuser_required
 def novo_funcionario(request: HttpRequest):
-    from django.contrib.auth import get_user_model
     User = get_user_model()
     erro = None
     if request.method == 'POST':
@@ -243,7 +244,6 @@ def novo_funcionario(request: HttpRequest):
 
 @_superuser_required
 def editar_funcionario(request: HttpRequest, pk: int):
-    from django.contrib.auth import get_user_model
     User = get_user_model()
     func = get_object_or_404(User, pk=pk, is_superuser=False)
     if request.method == 'POST':
@@ -264,7 +264,6 @@ def editar_funcionario(request: HttpRequest, pk: int):
 
 @_superuser_required
 def toggle_funcionario(request: HttpRequest, pk: int):
-    from django.contrib.auth import get_user_model
     User = get_user_model()
     if request.method == 'POST':
         func = get_object_or_404(User, pk=pk, is_superuser=False)
