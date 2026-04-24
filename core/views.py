@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, Http404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
@@ -161,6 +162,7 @@ def novo_servico(request: HttpRequest):
             descricao=descricao,
             valor=valor,
         )
+        messages.success(request, 'Formulário enviado!')
         return redirect('home')
     return render(request, 'NovoServico.html', {'clientes': clientes_lista})
 

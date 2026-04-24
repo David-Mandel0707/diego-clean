@@ -94,19 +94,23 @@
 <div class="section-title" style="margin-bottom:20px;">Novo Serviço</div>
 
 <div class="card">
-  <form method="POST">
+  <form method="POST" onsubmit="aviso(event)">
     {% csrf_token %}
 
     <div class="campo">
       <label for="cliente">Cliente *</label>
       <div class="select-wrapper">
-        <select id="cliente" name="cliente" required>
+        <select id="cliente" name="cliente" onchange="redirecionar(this.value)" required>
           <option value="" disabled selected>Selecione um cliente</option>
+          <option value="novocliente">Adicionar novo cliente</option>
           {% for c in clientes %}
           <option value="{{ c.pk }}" {% if request.GET.cliente == c.pk|stringformat:"s" %}selected{% endif %}>
             {{ c.nome }}
           </option>
           {% endfor %}
+          {% for m in messages %}
+          {% endfor %}
+          <p id="aviso" style="display:none;color: green;">{{ m }}</p>
         </select>
       </div>
     </div>
@@ -129,5 +133,18 @@
     <button type="submit" class="btn-salvar">Registrar serviço</button>
   </form>
 </div>
+
+<script>
+function redirecionar(valor) {
+  if (valor === 'novocliente') {
+    window.location.href = '{% url "novo_cliente" %}'
+  }
+}
+
+setTimeout(() => {
+    const aviso = document.getElementById('aviso');
+    if (aviso) aviso.style.display = 'none';
+}, 3000);
+</script>
 
 {% endblock %}

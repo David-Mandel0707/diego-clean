@@ -20,6 +20,6 @@ def login(request):
             auth_login(request, user)
             return redirect('home')
         else:
-            return render(request, 'Login.html', {'error': 'Usuário ou senha inválidos'})
+            return render(request, 'login.html', {'error': 'Usuário ou senha inválidos'})
 
     return render(request, 'login.html')
