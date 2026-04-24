@@ -88,9 +88,9 @@ def home(request: HttpRequest):
 
     if request.user.is_superuser:
         counts = Servico.objects.aggregate(
-            pago=Count('pk', filter=Q(status_pagamento=Servico.PAGO)),
-            pendente=Count('pk', filter=Q(status_pagamento=Servico.PENDENTE)),
-            cancelado=Count('pk', filter=Q(status_pagamento=Servico.CANCELADO)),
+            pago=Count('pk', filter=Q(status_pagamento=Servico.PAGO, data__year=hoje.year, data__month=hoje.month)),
+            pendente=Count('pk', filter=Q(status_pagamento=Servico.PENDENTE, data__year=hoje.year, data__month=hoje.month)),
+            cancelado=Count('pk', filter=Q(status_pagamento=Servico.CANCELADO, data__year=hoje.year, data__month=hoje.month)),
         )
         fig_pizza = go.Figure(go.Pie(
             labels=['Realizados (Pago)', 'Pendentes', 'Cancelados'],
