@@ -64,6 +64,23 @@
     padding: 32px 0;
   }
 
+  .grafico-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .grafico-grid > div { min-width: 0; }
+
+  .grafico-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    overflow: hidden;
+  }
+
 </style>
 
 <div style="margin-bottom:24px;">
@@ -89,32 +106,38 @@
   </div>
 </div>
 
+{% if grafico_mensal_proprio %}
+<div class="section-header" style="margin-bottom:12px;">
+  <span class="section-title">Minhas vendas por mês ({{ hoje.year }})</span>
+</div>
+<div class="grafico-card" style="margin-bottom:28px;">{{ grafico_mensal_proprio|safe }}</div>
+
+<div class="section-header" style="margin-bottom:12px;">
+  <span class="section-title">Minhas vendas por ano</span>
+</div>
+<div class="grafico-card" style="margin-bottom:28px;">{{ grafico_anual_proprio|safe }}</div>
+{% endif %}
+
 {% if grafico_pizza %}
 <div style="margin-bottom:28px;">
   <div class="section-header" style="margin-bottom:12px;">
     <span class="section-title">Serviços por status</span>
   </div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
-    {{ grafico_pizza|safe }}
-  </div>
+  <div class="grafico-card">{{ grafico_pizza|safe }}</div>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
-  <div>
+<div class="grafico-grid">
+  <div style="min-width:0;">
     <div class="section-header" style="margin-bottom:12px;">
       <span class="section-title">Vendas por mês ({{ hoje.year }})</span>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
-      {{ grafico_mensal|safe }}
-    </div>
+    <div class="grafico-card">{{ grafico_mensal|safe }}</div>
   </div>
-  <div>
+  <div style="min-width:0;">
     <div class="section-header" style="margin-bottom:12px;">
       <span class="section-title">Vendas por ano</span>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
-      {{ grafico_anual|safe }}
-    </div>
+    <div class="grafico-card">{{ grafico_anual|safe }}</div>
   </div>
 </div>
 {% endif %}

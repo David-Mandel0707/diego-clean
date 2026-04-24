@@ -32,6 +32,57 @@ def home(request: HttpRequest):
     grafico_pizza = None
     grafico_mensal = None
     grafico_anual = None
+    grafico_mensal_proprio = None
+    grafico_anual_proprio = None
+
+    MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+
+    if not request.user.is_superuser:
+        vendas_mes_proprio = {m: 0.0 for m in range(1, 13)}
+        for row in Servico.objects.filter(status_pagamento=Servico.PAGO, funcionario=request.user, data__year=hoje.year).values('data__month', 'valor'):
+            vendas_mes_proprio[row['data__month']] += float(row['valor'])
+        fig_mp = go.Figure(go.Bar(
+            x=MESES,
+            y=[vendas_mes_proprio[m] for m in range(1, 13)],
+            marker_color='#2563eb',
+            text=[f'R$ {v:,.2f}' for v in [vendas_mes_proprio[m] for m in range(1, 13)]],
+            textposition='outside',
+        ))
+        fig_mp.update_layout(
+            margin=dict(t=20, b=40, l=60, r=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
+            xaxis=dict(gridcolor='rgba(0,0,0,0)'),
+            font=dict(family='inherit', size=12),
+            height=280,
+            autosize=True,
+        )
+        grafico_mensal_proprio = fig_mp.to_html(full_html=False, include_plotlyjs='cdn', config={'displayModeBar': False, 'responsive': True})
+
+        vendas_ano_proprio: dict[int, float] = {}
+        for row in Servico.objects.filter(status_pagamento=Servico.PAGO, funcionario=request.user).values('data__year', 'valor'):
+            vendas_ano_proprio[row['data__year']] = vendas_ano_proprio.get(row['data__year'], 0.0) + float(row['valor'])
+        anos_sorted_proprio = sorted(vendas_ano_proprio.keys())
+        fig_ap = go.Figure(go.Bar(
+            x=[str(a) for a in anos_sorted_proprio],
+            y=[vendas_ano_proprio[a] for a in anos_sorted_proprio],
+            marker_color='#16a34a',
+            text=[f'R$ {vendas_ano_proprio[a]:,.2f}' for a in anos_sorted_proprio],
+            textposition='outside',
+        ))
+        fig_ap.update_layout(
+            margin=dict(t=20, b=40, l=60, r=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            yaxis=dict(tickprefix='R$ ', gridcolor='#e5e7eb'),
+            xaxis=dict(gridcolor='rgba(0,0,0,0)', type='category'),
+            font=dict(family='inherit', size=12),
+            height=280,
+            autosize=True,
+        )
+        grafico_anual_proprio = fig_ap.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False, 'responsive': True})
+
     if request.user.is_superuser:
         counts = {s: 0 for s in [Servico.PAGO, Servico.PENDENTE, Servico.CANCELADO]}
         for row in Servico.objects.values('status_pagamento'):
@@ -50,9 +101,8 @@ def home(request: HttpRequest):
             showlegend=False,
             font=dict(family='inherit', size=13),
         )
-        grafico_pizza = fig_pizza.to_html(full_html=False, include_plotlyjs='cdn', config={'displayModeBar': False})
+        grafico_pizza = fig_pizza.to_html(full_html=False, include_plotlyjs='cdn', config={'displayModeBar': False, 'responsive': True})
 
-        MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
         vendas_mes = {m: 0.0 for m in range(1, 13)}
         for row in Servico.objects.filter(status_pagamento=Servico.PAGO, data__year=hoje.year).values('data__month', 'valor'):
             vendas_mes[row['data__month']] += float(row['valor'])
@@ -71,8 +121,9 @@ def home(request: HttpRequest):
             xaxis=dict(gridcolor='rgba(0,0,0,0)'),
             font=dict(family='inherit', size=12),
             height=280,
+            autosize=True,
         )
-        grafico_mensal = fig_mensal.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False})
+        grafico_mensal = fig_mensal.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False, 'responsive': True})
 
         vendas_ano: dict[int, float] = {}
         for row in Servico.objects.filter(status_pagamento=Servico.PAGO).values('data__year', 'valor'):
@@ -93,8 +144,9 @@ def home(request: HttpRequest):
             xaxis=dict(gridcolor='rgba(0,0,0,0)', type='category'),
             font=dict(family='inherit', size=12),
             height=280,
+            autosize=True,
         )
-        grafico_anual = fig_anual.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False})
+        grafico_anual = fig_anual.to_html(full_html=False, include_plotlyjs=False, config={'displayModeBar': False, 'responsive': True})
 
     return render(request, 'Home.html', {
         'page_pendentes': page_pendentes,
@@ -104,6 +156,8 @@ def home(request: HttpRequest):
         'grafico_pizza': grafico_pizza,
         'grafico_mensal': grafico_mensal,
         'grafico_anual': grafico_anual,
+        'grafico_mensal_proprio': grafico_mensal_proprio,
+        'grafico_anual_proprio': grafico_anual_proprio,
         'hoje': hoje,
     })
 
